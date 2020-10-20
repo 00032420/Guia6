@@ -29,7 +29,7 @@ void mostrarMenu(const vector<Opcion>& menu){
     bool continuar = true;
     int opcion = 0;
     while(continuar){
-        cout << "\nMenu:\n";
+        cout << "\nMenu:\n\n";
         for(const Opcion& unaOpcion: menu){
             cout << unaOpcion.num << "] " << unaOpcion.texto << endl;
         }
