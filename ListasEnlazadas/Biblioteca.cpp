@@ -157,7 +157,7 @@ void agregar();
 void mostrar();
 void eliminar();
 void buscar();
-void invertir(Nodo**);
+void invertir(Nodo*);
 void vaciar(Nodo**);
 int contarOcurrencias();
 T acceder();
@@ -198,6 +198,7 @@ int main(){
             case 9: acceder(); break;
             case 10: continuar = false; break;
             default: cout << "\nOpcion invalida" << endl; break;
+
         }
     }while (continuar);
 

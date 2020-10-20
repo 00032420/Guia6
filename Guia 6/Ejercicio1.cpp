@@ -58,13 +58,10 @@ T solicitarDato(){
     return unaPersona;
 }
 
-bool comparar(const T& a, const T& b){
-    return (a.carnet == b.carnet) &&
-           (a.email == b.email) &&
-           (a.telefono == b.telefono) &&
-           (a.edad == b.edad) &&
-           (a.apellido == b.apellido) &&
-           (a.nombre == b.nombre);
+bool comparar(T a, T b);
+
+bool compararCarnet(const T& a, const int& carnet){
+    return (a.carnet == carnet);
 }
 
 void mostrarDato(const T& dato){
@@ -83,28 +80,27 @@ bool empty(Lista*);
 int cantidadDatos(Nodo*);
 void insertarInicio(T, Lista*);
 void insertarFinal(T, Lista*);
-void insertarDespuesDe(T);
-void insertarAntesDe(T);
-void agregar();
+void insertarDespuesDe(T, Lista*);
+void insertarAntesDe(T, Lista*);
+void agregar(Lista*);
 void mostrar(Lista*);
-void eliminar(Nodo*);
-void buscar(Nodo*);
-void invertir(Nodo**);
-void vaciar(Nodo**);
-int contarOcurrencias(Nodo**);
-T acceder(Nodo**);
-
+void eliminar(Lista*);
+void buscar(Lista*);
+void invertir(Lista*);
+void vaciar(Lista**);
+int contarOcurrencias(Lista**);
+T acceder(Lista**);
 
 int main(){
     Lista unaLista;
     cout << "Inicializando";
     init(&unaLista);
     cout << empty(&unaLista) << endl;
-    T dato = solicitarDato();
-    insertarInicio(dato, &unaLista);
+    agregar(&unaLista);
+    agregar(&unaLista);
+    agregar(&unaLista);
     mostrar(&unaLista);
-    T dato2 = solicitarDato();
-    insertarFinal(dato2, &unaLista);
+    invertir(&unaLista);
     mostrar(&unaLista);
     return 0;
 }
@@ -152,6 +148,86 @@ void insertarFinal(T dato, Lista *inicioLista){
     }
 }
 
+void insertarDespuesDe(T dato, Lista *inicioLista){
+    cout << "Dato de referencia: ";
+    int c;
+    cin >> c;
+    Nodo *unNodo = *inicioLista;
+    while(unNodo != nullptr && !compararCarnet(unNodo->dato, c)) unNodo = unNodo->siguiente;
+    if(unNodo == nullptr){
+        cout << "\nDato de referencia no existe\n";
+        return;
+    }
+
+    Nodo *nuevo = new Nodo;
+    nuevo->dato = move(dato);
+    nuevo->siguiente = unNodo->siguiente;
+
+    unNodo->siguiente = nuevo;
+    cout << "\nDato insertado con exito" << endl;
+}
+
+void insertarAntesDe(T dato, Lista *inicioLista){
+    cout << "Dato de referencia: ";
+    int c;
+    cin >> c;
+    Nodo *unNodo = *inicioLista, *aux = nullptr;
+
+    while(unNodo != nullptr && !compararCarnet(unNodo->dato, c)){
+        aux = unNodo;
+        unNodo = unNodo->siguiente;
+    }
+    if(unNodo == nullptr){
+        cout << endl << "Dato de referencia no existe" << endl;
+        return;
+    }
+
+    Nodo *nuevo = new Nodo;
+    nuevo->dato = move(dato);
+    nuevo->siguiente = unNodo;
+
+    if(aux == nullptr) *inicioLista = nuevo;
+    else{
+        aux->siguiente = nuevo;
+        cout << endl << "Dato insertado con exito" << endl;
+
+    }
+
+}
+
+void agregar(Lista *unaLista){
+    T unDato = solicitarDato();
+    bool continuar = true;
+    do{
+        cout << endl << "1] Al principio" << endl;
+        cout << "2] Al final" << endl;
+        cout << "3] Despues de" << endl;
+        cout << "4] Antes de" << endl;
+        cout << endl << "Digite su opcion:";
+        int opcion = validarRango(to_string(opcion), 1, 4);
+
+        switch(opcion){
+            case 1:insertarInicio(unDato, unaLista);
+                continuar = false;
+                break;
+
+            case 2: insertarFinal(unDato, unaLista);
+                continuar = false;
+                break;
+
+            case 3: insertarDespuesDe(unDato, unaLista);
+                continuar = false;
+                break;
+
+            case 4: insertarAntesDe(unDato, unaLista);
+                continuar = false;
+                break;
+
+            default: cout << endl << "Opcion invalida" << endl;
+        }
+    }while(continuar);
+}
+
 void mostrar(Lista *inicioLista){
     Nodo *unNodo = *inicioLista;
     while(unNodo != nullptr){
@@ -159,4 +235,73 @@ void mostrar(Lista *inicioLista){
         unNodo = unNodo->siguiente;
     }
 }
+
+void eliminar(Lista *inicioLista){
+    cout << endl << "Dato a eliminar: ";
+    T ref = solicitarDato();
+
+    Nodo *unNodo = *inicioLista, *aux = nullptr;
+
+    while(unNodo != nullptr &&  !comparar(unNodo->dato, ref)){
+        aux = unNodo;
+        unNodo = unNodo->siguiente;
+    }
+
+    if(unNodo == nullptr){
+        cout << endl << "Dato a borrar no existe." << endl;
+        return;
+    }
+
+    if(aux == nullptr) *inicioLista = unNodo->siguiente;
+    else aux->siguiente = unNodo->siguiente;
+    delete(unNodo);
+    cout << endl << "Dato borrado" << endl;
+
+}
+
+void buscar(Lista *inicioLista){
+    cout << endl << "Dato a buscar: ";
+    T ref = solicitarDato();
+
+    Nodo *unNodo = *inicioLista;
+
+    while(unNodo != nullptr && !comparar(unNodo->dato, ref)) unNodo = unNodo->siguiente;
+
+    if(unNodo != nullptr){
+        cout << endl << "El dato si se encuentra" << endl;
+        mostrarDato(unNodo->dato);
+    } else{
+        cout << endl << "El dato no se encuentra" << endl;
+    }
+}
+
+void invertir(Lista* nodoInicio){
+    Nodo *resultante = nullptr;
+    Nodo *actual = *nodoInicio;
+    Nodo *siguiente;
+
+    while(actual != nullptr){
+        siguiente = actual->siguiente;
+
+        actual->siguiente = resultante;
+        resultante = actual;
+        actual = siguiente;
+    }
+    *nodoInicio = resultante;
+
+    cout << endl << "Lista invertida con exito" << endl;
+}
+
+
+
+bool comparar(T a,T b) {
+    return (a.carnet == b.carnet) &&
+           (a.email == b.email) &&
+           (a.telefono == b.telefono) &&
+           (a.edad == b.edad) &&
+           (a.apellido == b.apellido) &&
+           (a.nombre == b.nombre);
+}
+
+
 
